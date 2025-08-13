@@ -48,6 +48,7 @@ async def index():
         if isJson: return jsonify(dict(success=True, candles=candles))
         return render_template('chart.html', candles_str=json.dumps(candles), market=market)
     except Exception as err:
+        return str(err)
         traceback.print_exc()
         if isJson: return jsonify(dict(success=False, msg=f'Internal Server Error. {err}'))
         else: return f'<h1>Internal Server Error</h1><br/><pre><code>{err}</code></pre>'
