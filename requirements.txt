@@ -1,6 +1,17 @@
 flask
 flask[async]
 waitress
+
+beautifulsoup4
+certifi
+charset-normalizer
+idna
 numpy
-git+https://github.com/cleitonleonel/pyquotex.git
+pyfiglet
+requests
+soupsieve
+typing_extensions
+urllib3
+websocket-client
+websocket-client[optional]
 
