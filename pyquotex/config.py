@@ -20,7 +20,7 @@ def credentials():
             f"email={input('Enter your account email: ')}\n"
             f"password={input('Enter your account password: ')}\n"
         )
-        config_path.write_text(text_settings)
+        # config_path.write_text(text_settings)
 
     config.read(config_path, encoding="utf-8")
 
