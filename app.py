@@ -11,6 +11,7 @@ async def index():
     market = request.args.get('market')
     period = request.args.get('period', 60, int)
     isJson = 'application/json' in request.headers.get('Accept', '')
+    print(request.url)
     
     if not market:
         return """
