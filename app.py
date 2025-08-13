@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect
 from pyquotex.stable_api import Quotex
 import traceback, json
 
@@ -38,6 +38,8 @@ async def index():
         client = Quotex(email, password, "en")
         success, message = await client.connect()
         if not success:
+            if 'Handshake status 403 Forbidden'.lower() in str(message).lower():
+                return redirect(request.full_path)
             if isJson: return jsonify(dict(success=False, msg=f'Cannot Login. Make sure that 2fa is off. Message: {message}'))
             else: return f'<h3>Cannot Login. Make sure that 2fa is off. Message: {message}</h3>'
         candles = await client.get_candle_v2(market, period)
