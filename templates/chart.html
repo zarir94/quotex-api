@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ market }} Candlestick Chart</title>
+  <style>
+    #chart {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+
+  <!-- Lightweight Charts CDN -->
+  <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+
+  <script>
+    var candleData = {{ candles_str | safe }};
+
+    var chart = LightweightCharts.createChart(document.getElementById('chart'), {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        layout: {
+            backgroundColor: '#000',
+            textColor: '#fff',
+        },
+        grid: {
+            vertLines: { color: 'rgba(197, 203, 206, 0.5)' },
+            horzLines: { color: 'rgba(197, 203, 206, 0.5)' },
+        },
+        timeScale: {
+            timeVisible: true,
+            secondsVisible: true
+        }
+    });
+
+    var candleSeries = chart.addCandlestickSeries({
+        upColor: '#26a69a',
+        downColor: '#ef5350',
+        borderDownColor: '#ef5350',
+        borderUpColor: '#26a69a',
+        wickDownColor: '#ef5350',
+        wickUpColor: '#26a69a',
+    });
+
+    candleSeries.setData(candleData);
+
+    window.addEventListener('resize', () => {
+        chart.resize(window.innerWidth, window.innerHeight);
+    });
+
+
+    var defaultBars = 40;
+    var lastIndex = candleData.length - 1;
+    var firstIndex = Math.max(0, lastIndex - defaultBars);
+
+    chart.timeScale().setVisibleRange({
+      from: candleData[firstIndex].time,
+      to: candleData[lastIndex].time
+    });
+  </script>
+</body>
+</html>
