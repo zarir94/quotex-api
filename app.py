@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, redirect
 from pyquotex.stable_api import Quotex
 import traceback, json, os
-os.environ['RES_PATH'] = '/tmp'
+# os.environ['RES_PATH'] = '/tmp'
 
 app = Flask(__name__)
 

@@ -94,13 +94,13 @@ class Login(Browser):
             self.api.session_data["user_agent"] = self.headers["User-Agent"]
             output_file = Path(f"{self.api.resource_path}/session.json")
             output_file.parent.mkdir(exist_ok=True, parents=True)
-            output_file.write_text(
-                json.dumps({
-                    "cookies": self.cookies,
-                    "token": self.ssid,
-                    "user_agent": self.headers["User-Agent"]
-                }, indent=4)
-            )
+            # output_file.write_text(
+            #     json.dumps({
+            #         "cookies": self.cookies,
+            #         "token": self.ssid,
+            #         "user_agent": self.headers["User-Agent"]
+            #     }, indent=4)
+            # )
             return self.response, json.loads(match)
 
         return None, None
