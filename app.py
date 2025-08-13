@@ -43,6 +43,7 @@ async def index():
             if isJson: return jsonify(dict(success=False, msg=f'Cannot Login. Make sure that 2fa is off. Message: {message}'))
             else: return f'<h3>Cannot Login. Make sure that 2fa is off. Message: {message}</h3>'
         candles = await client.get_candle_v2(market, period)
+        await client.close()
         if isJson: return jsonify(dict(success=True, candles=candles))
         return render_template('chart.html', candles_str=json.dumps(candles), market=market)
     except Exception as err:
