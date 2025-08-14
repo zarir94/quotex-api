@@ -27,6 +27,7 @@ from .ws.objects.profile import Profile
 from .ws.objects.listinfodata import ListInfoData
 from .ws.client import WebsocketClient
 from collections import defaultdict
+from urllib.parse import urlparse
 
 urllib3.disable_warnings()
 logger = logging.getLogger(__name__)
@@ -93,6 +94,7 @@ class QuotexAPI(object):
         """
         self.host = host
         self.https_url = f"https://{host}"
+        self.https_url = '/'.join(requests.get(self.https_url, verify=False).url.split('/', 3)[:3])
         self.wss_url = f"wss://ws2.{host}/socket.io/?EIO=3&transport=websocket"
         self.wss_message = None
         self.websocket_thread = None
@@ -472,6 +474,16 @@ class QuotexAPI(object):
             },
             "reconnect": 5
         }
+
+        proxy_data = dict()
+        if pr := os.environ.get('HTTP_PROXY') or os.environ.get('HTTPS_PROXY'):
+            parsed = urlparse(pr)
+            proxy_data["http_proxy_host"] = parsed.hostname
+            proxy_data["http_proxy_port"] = parsed.port
+            proxy_data["proxy_type"] = parsed.scheme.lower()
+            if parsed.username:
+                proxy_data["http_proxy_auth"] = (parsed.username, parsed.password)
+        payload = payload | proxy_data
         if platform.system() == "Linux":
             payload["sslopt"]["ssl_version"] = ssl.PROTOCOL_TLS
         self.websocket_thread = threading.Thread(

@@ -9,9 +9,11 @@ idna
 numpy
 pyfiglet
 requests
+requests[socks]
 soupsieve
 typing_extensions
 urllib3
+rel
 websocket-client
 websocket-client[optional]
 

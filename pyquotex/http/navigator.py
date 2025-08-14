@@ -1,4 +1,4 @@
-import ssl
+import ssl, json
 import logging
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -17,7 +17,7 @@ logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
 logger.addHandler(handler)
-
+i = 0
 
 class CipherSuiteAdapter(HTTPAdapter):
     __attrs__ = [
@@ -151,6 +151,8 @@ class Browser(Session):
             return None
 
     def send_request(self, method, url, headers=None, **kwargs):
+        global i
+        i += 1
         merged_headers = self.headers.copy()
         if headers:
             merged_headers.update(headers)
@@ -166,6 +168,7 @@ class Browser(Session):
         )
 
         if self.debug:
+            open(f'test_{i}.html', 'w', encoding='UTF-8').write(f'{self.response.status_code} {method} {url} {json.dumps(kwargs, indent=4)}' + self.response.text)
             logger.debug(f"→ {method} {url}")
             logger.debug(f"Status: {self.response.status_code}")
             logger.debug(f"Headers enviados: {merged_headers}")

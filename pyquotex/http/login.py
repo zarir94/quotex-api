@@ -1,10 +1,11 @@
-import re
+import re, urllib3
+from requests import get
 import json
 import sys
 import asyncio
 from pathlib import Path
 from pyquotex.http.navigator import Browser
-
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class Login(Browser):
     """Class for Quotex login resource."""
@@ -12,8 +13,8 @@ class Login(Browser):
     url = ""
     cookies = None
     ssid = None
-    base_url = 'qxbroker.com'
-    https_base_url = f'https://{base_url}'
+    https_base_url = '/'.join(get('https://qxbroker.com', verify=False).url.split('/', 3)[:3])
+    base_url = https_base_url.split("//")[-1].split("/")[0]
 
     def __init__(self, api, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -94,13 +95,13 @@ class Login(Browser):
             self.api.session_data["user_agent"] = self.headers["User-Agent"]
             output_file = Path(f"{self.api.resource_path}/session.json")
             output_file.parent.mkdir(exist_ok=True, parents=True)
-            # output_file.write_text(
-            #     json.dumps({
-            #         "cookies": self.cookies,
-            #         "token": self.ssid,
-            #         "user_agent": self.headers["User-Agent"]
-            #     }, indent=4)
-            # )
+            output_file.write_text(
+                json.dumps({
+                    "cookies": self.cookies,
+                    "token": self.ssid,
+                    "user_agent": self.headers["User-Agent"]
+                }, indent=4)
+            )
             return self.response, json.loads(match)
 
         return None, None

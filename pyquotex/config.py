@@ -63,11 +63,12 @@ def load_session(user_agent):
             "token": None,
             "user_agent": user_agent
         }
-        # session_result = json.dumps(session_dict, indent=4)
-        # output_file.write_text(
-        #     session_result
-        # )
-    return session_dict
+        session_result = json.dumps(session_dict, indent=4)
+        output_file.write_text(
+            session_result
+        )
+        session_data = json.loads(session_result)
+    return session_data
 
 
 def update_session(session_data):
@@ -76,11 +77,11 @@ def update_session(session_data):
             "session.json"
         )
     )
-    # session_result = json.dumps(session_data, indent=4)
-    # output_file.write_text(
-    #     session_result
-    # )
-    # session_data = json.loads(
-    #     session_result
-    # )
+    session_result = json.dumps(session_data, indent=4)
+    output_file.write_text(
+        session_result
+    )
+    session_data = json.loads(
+        session_result
+    )
     return session_data
