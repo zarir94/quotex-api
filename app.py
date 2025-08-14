@@ -2,9 +2,9 @@ from flask import Flask, request, jsonify, render_template, redirect, make_respo
 from pyquotex.stable_api import Quotex
 import traceback, json, os, random, threading, time, requests as rq, logging, asyncio
 
-for logger_name in logging.root.manager.loggerDict:
-    if not logger_name.startswith("waitress"):
-        logging.getLogger(logger_name).setLevel(logging.CRITICAL)
+# for logger_name in logging.root.manager.loggerDict:
+#     if not logger_name.startswith("waitress"):
+#         logging.getLogger(logger_name).setLevel(logging.CRITICAL)
 
 # os.environ['RES_PATH'] = '/tmp'
 PROXIES = [
@@ -87,8 +87,8 @@ async def index():
                 has_connect_run = False
                 if 'Handshake status 525'.lower() in str(message).lower(): return redirect(request.full_path)
                 if 'Handshake status 403 Forbidden'.lower() in str(message).lower(): return redirect(request.full_path)
-                if isJson: return jsonify(dict(success=False, msg=f'Cannot Login. Make sure that 2fa is off. Message: {message}'))
-                else: return f'<h3>Cannot Login. Make sure that 2fa is off. Message: {message}</h3>'
+                if isJson: return make_response(jsonify(dict(success=False, msg=f'Cannot Login. Make sure that 2fa is off. Message: {message}')), 500)
+                else: return make_response(f'<h3>Cannot Login. Make sure that 2fa is off. Message: {message}</h3>', 500)
             has_connect_run = True
         candles = await client.get_candle_v2(market, period)
         if isJson: return jsonify(dict(success=True, candles=candles))
@@ -104,7 +104,7 @@ async def index():
 def pingSelf():
     while 1:
         try:
-            rq.get('http://127.0.0.1:8000/?market=EURUSD')
+            while rq.get('http://127.0.0.1:8000/?market=EURUSD', proxies=dict(http=None, https=None)).status_code != 200: continue
             print('Keep Connection', flush=True)
         except rq.exceptions.ConnectionError: continue
         except:
