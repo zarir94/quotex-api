@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify, render_template, redirect, make_response
 from pyquotex.stable_api import Quotex
-import traceback, json, os, random, threading, time, requests as rq, logging
+import traceback, json, os, random, threading, time, requests as rq, logging, asyncio
 
-# for logger_name in logging.root.manager.loggerDict:
-#     if not logger_name.startswith("waitress"):
-#         logging.getLogger(logger_name).setLevel(logging.CRITICAL)
+for logger_name in logging.root.manager.loggerDict:
+    if not logger_name.startswith("waitress"):
+        logging.getLogger(logger_name).setLevel(logging.CRITICAL)
 
 # os.environ['RES_PATH'] = '/tmp'
 PROXIES = [
@@ -78,11 +78,15 @@ async def index():
 
     try:
         if not has_connect_run:
+            if has_connect_run is None:
+                while has_connect_run is None: await asyncio.sleep(0.5)
+                return redirect(request.full_path)
+            has_connect_run = None
             success, message = await client.connect()
             if not success:
+                has_connect_run = False
                 if 'Handshake status 525'.lower() in str(message).lower(): return redirect(request.full_path)
-                if 'Handshake status 403 Forbidden'.lower() in str(message).lower():
-                    return redirect(request.full_path)
+                if 'Handshake status 403 Forbidden'.lower() in str(message).lower(): return redirect(request.full_path)
                 if isJson: return jsonify(dict(success=False, msg=f'Cannot Login. Make sure that 2fa is off. Message: {message}'))
                 else: return f'<h3>Cannot Login. Make sure that 2fa is off. Message: {message}</h3>'
             has_connect_run = True
@@ -90,6 +94,7 @@ async def index():
         if isJson: return jsonify(dict(success=True, candles=candles))
         return render_template('chart.html', candles_str=json.dumps(candles), market=market)
     except Exception as err:
+        if not has_connect_run: has_connect_run = False
         if 'socket is already closed' in str(err): return redirect(request.full_path)
         traceback.print_exc()
         if isJson: return make_response(jsonify(dict(success=False, msg=f'Internal Server Error. {err}')), 500)
