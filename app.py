@@ -1,12 +1,25 @@
 from flask import Flask, request, jsonify, render_template, redirect, make_response
 from pyquotex.stable_api import Quotex
-import traceback, json, os, random, threading, time, requests as rq
+import traceback, json, os, random, threading, time, requests as rq, logging
+
+# for logger_name in logging.root.manager.loggerDict:
+#     if not logger_name.startswith("waitress"):
+#         logging.getLogger(logger_name).setLevel(logging.CRITICAL)
 
 # os.environ['RES_PATH'] = '/tmp'
 PROXIES = [
-    'socks5h://mariam:mariam_1@27.131.14.77:9169',
-    'socks5h://mariam1:mariam_1@103.134.60.86:9169'
+    # 'socks5h://mariam:mariam_1@27.131.14.77:9169',
+    # 'socks5h://mariam1:mariam_1@103.134.60.86:9169'
 ]
+
+print('Fetching Base HTTP Url for Quotex', flush=True)
+while 1:
+    try:
+        rxp = random.choice(PROXIES or [None])
+        os.environ['QX_HTTPS_BASE'] = '/'.join(rq.get('https://qxbroker.com', verify=False, proxies=dict(http=rxp, https=rxp) if rxp else None).url.split('/', 3)[:3])
+        break
+    except rq.exceptions.ConnectionError: pass
+print('Done', flush=True)
 
 app = Flask(__name__)
 client = Quotex("drive4341@gmail.com", "drive@1", "en")
@@ -19,8 +32,9 @@ def set_suffled_proxy():
     if prev_pr: return
     uniq_pr = [p for p in PROXIES if p != prev_pr]
     pr = random.choice(uniq_pr or PROXIES or [None])
-    os.environ['HTTP_PROXY'] = pr
-    os.environ['HTTPS_PROXY'] = pr
+    if pr:
+        os.environ['HTTP_PROXY'] = pr
+        os.environ['HTTPS_PROXY'] = pr
 
 
 @app.after_request
@@ -37,6 +51,7 @@ def remove_proxy(res):
 
 @app.route('/')
 async def index():
+    print('reqqqqqq')
     global has_connect_run
     market = request.args.get('market')
     period = request.args.get('period', 60, int)
@@ -67,7 +82,8 @@ async def index():
             success, message = await client.connect()
             if not success:
                 if 'Handshake status 525'.lower() in str(message).lower(): return redirect(request.full_path)
-                # if 'Handshake status 403 Forbidden'.lower() in str(message).lower(): return redirect(request.full_path)
+                if 'Handshake status 403 Forbidden'.lower() in str(message).lower():
+                    return redirect(request.full_path)
                 if isJson: return jsonify(dict(success=False, msg=f'Cannot Login. Make sure that 2fa is off. Message: {message}'))
                 else: return f'<h3>Cannot Login. Make sure that 2fa is off. Message: {message}</h3>'
             has_connect_run = True

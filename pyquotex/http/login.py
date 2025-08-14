@@ -1,5 +1,4 @@
-import re, urllib3
-from requests import get
+import re, urllib3, os
 import json
 import sys
 import asyncio
@@ -13,10 +12,10 @@ class Login(Browser):
     url = ""
     cookies = None
     ssid = None
-    https_base_url = '/'.join(get('https://qxbroker.com', verify=False).url.split('/', 3)[:3])
-    base_url = https_base_url.split("//")[-1].split("/")[0]
 
     def __init__(self, api, *args, **kwargs):
+        self.https_base_url = os.environ.get('QX_HTTPS_BASE', 'https://qxbroker.com')
+        self.base_url = self.https_base_url.split("//")[-1].split("/")[0]
         super().__init__(*args, **kwargs)
         self.api = api
         self.html = None

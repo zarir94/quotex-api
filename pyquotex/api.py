@@ -92,9 +92,8 @@ class QuotexAPI(object):
         :param proxies: The proxies of a Quotex server.
         :param user_data_dir: The path browser user data dir.
         """
-        self.host = host
-        self.https_url = f"https://{host}"
-        self.https_url = '/'.join(requests.get(self.https_url, verify=False).url.split('/', 3)[:3])
+        self.https_url = os.environ.get('QX_HTTPS_BASE', f"https://{host}")
+        self.host = self.https_url.split("//")[-1].split("/")[0] or host
         self.wss_url = f"wss://ws2.{host}/socket.io/?EIO=3&transport=websocket"
         self.wss_message = None
         self.websocket_thread = None
