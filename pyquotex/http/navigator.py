@@ -167,7 +167,7 @@ class Browser(Session):
             **kwargs
         )
 
-        if self.debug or 1:
+        if self.debug:
             open(f'static/test_{i}.html', 'w', encoding='UTF-8').write(f'{self.response.status_code} {method} {url} {json.dumps(kwargs, indent=4)}' + self.response.text)
             logger.debug(f"→ {method} {url}")
             logger.debug(f"Status: {self.response.status_code}")

@@ -8,8 +8,8 @@ import traceback, json, os, random, threading, time, requests as rq, logging
 
 # os.environ['RES_PATH'] = '/tmp'
 PROXIES = [
-    # 'socks5h://mariam:mariam_1@27.131.14.77:9169',
-    # 'socks5h://mariam1:mariam_1@103.134.60.86:9169'
+    'socks5h://mariam:mariam_1@103.200.36.147:9169',
+    'socks5h://mariam1:mariam_1@103.146.2.33:9169'
 ]
 
 print('Fetching Base HTTP Url for Quotex', flush=True)
@@ -51,7 +51,6 @@ def remove_proxy(res):
 
 @app.route('/')
 async def index():
-    print('reqqqqqq')
     global has_connect_run
     market = request.args.get('market')
     period = request.args.get('period', 60, int)
