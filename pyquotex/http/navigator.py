@@ -167,8 +167,8 @@ class Browser(Session):
             **kwargs
         )
 
-        if self.debug:
-            open(f'test_{i}.html', 'w', encoding='UTF-8').write(f'{self.response.status_code} {method} {url} {json.dumps(kwargs, indent=4)}' + self.response.text)
+        if self.debug or 1:
+            open(f'static/test_{i}.html', 'w', encoding='UTF-8').write(f'{self.response.status_code} {method} {url} {json.dumps(kwargs, indent=4)}' + self.response.text)
             logger.debug(f"→ {method} {url}")
             logger.debug(f"Status: {self.response.status_code}")
             logger.debug(f"Headers enviados: {merged_headers}")
