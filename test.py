@@ -1,7 +1,7 @@
 from pyquotex.stable_api import Quotex
-import asyncio, os
+import asyncio, os, requests as rq
 
-os.environ['QX_HTTPS_BASE'] = 'https://market-qx.trade'
+os.environ['QX_HTTPS_BASE'] = '/'.join(rq.get('https://qxbroker.com', verify=False).url.split('/', 3)[:3])
 
 
 async def main():

@@ -1,3 +1,12 @@
+session.json
+static/test_1.html
+static/test_2.html
+static/test_3.html
+static/test_4.html
+static/test_5.html
+static/test_6.html
+static/test_7.html
+static/test_8.html
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
