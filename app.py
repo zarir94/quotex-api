@@ -109,7 +109,7 @@ def pingSelf():
         except rq.exceptions.ConnectionError: continue
         except:
             traceback.print_exc()
-        time.sleep(3 * 60)
+        time.sleep(1 * 60)
 
 threading.Thread(target=pingSelf, daemon=True).start()
 
