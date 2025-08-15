@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template, redirect, make_response
 from pyquotex.stable_api import Quotex
-import traceback, json, os, random, threading, time, requests as rq, logging, asyncio
+import traceback, json, os, random, threading, time, requests as rq, logging, asyncio, websocket
 
 # for logger_name in logging.root.manager.loggerDict:
 #     if not logger_name.startswith("waitress"):
@@ -78,6 +78,8 @@ async def index():
 
     try:
         if not has_connect_run:
+            try: await client.close()
+            except AttributeError: pass
             if has_connect_run is None:
                 while has_connect_run is None: await asyncio.sleep(0.5)
                 return redirect(request.full_path)
@@ -85,14 +87,24 @@ async def index():
             success, message = await client.connect()
             if not success:
                 has_connect_run = False
-                if 'Handshake status 525'.lower() in str(message).lower(): return redirect(request.full_path)
-                if 'Handshake status 403 Forbidden'.lower() in str(message).lower(): return redirect(request.full_path)
+                if 'Handshake status 525'.lower() in str(message).lower():
+                    print('Handshake 525 Code', flush=True)
+                    return redirect(request.full_path)
+                if 'Handshake status 403 Forbidden'.lower() in str(message).lower():
+                    print('Handshake 403 Forbidden', flush=True)
+                    return redirect(request.full_path)
                 if isJson: return make_response(jsonify(dict(success=False, msg=f'Cannot Login. Make sure that 2fa is off. Message: {message}')), 500)
                 else: return make_response(f'<h3>Cannot Login. Make sure that 2fa is off. Message: {message}</h3>', 500)
             has_connect_run = True
         candles = await client.get_candle_v2(market, period)
         if isJson: return jsonify(dict(success=True, candles=candles))
         return render_template('chart.html', candles_str=json.dumps(candles), market=market)
+    except websocket._exceptions.WebSocketConnectionClosedException:
+        try: await client.close()
+        except Exception as err:
+            print(f'[-] Client Close Error: {err}', flush=True)
+        has_connect_run = False
+        return redirect(request.full_path)
     except Exception as err:
         if not has_connect_run: has_connect_run = False
         if 'socket is already closed' in str(err): return redirect(request.full_path)
@@ -102,11 +114,14 @@ async def index():
 
 
 def pingSelf():
+    global has_connect_run
     while 1:
         try:
-            while rq.get('http://127.0.0.1:8000/?market=EURUSD', proxies=dict(http=None, https=None)).status_code != 200: continue
+            while rq.get('http://127.0.0.1:8000/?market=EURUSD', proxies=dict(http=None, https=None), timeout=10).status_code != 200: continue
             print('Keep Connection', flush=True)
         except rq.exceptions.ConnectionError: continue
+        except rq.exceptions.ReadTimeout:
+            has_connect_run = False
         except:
             traceback.print_exc()
         time.sleep(1 * 60)
