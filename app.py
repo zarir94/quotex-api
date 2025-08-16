@@ -53,10 +53,11 @@ def remove_proxy(res):
 async def index():
     global has_connect_run
     market = request.args.get('market')
+    fetchall = request.args.get('fetchall', False, bool)
     period = request.args.get('period', 60, int)
     isJson = 'application/json' in request.headers.get('Accept', '')
     
-    if not market:
+    if not (market or fetchall):
         return """
         <html>
             <head>
@@ -96,6 +97,11 @@ async def index():
                 if isJson: return make_response(jsonify(dict(success=False, msg=f'Cannot Login. Make sure that 2fa is off. Message: {message}')), 500)
                 else: return make_response(f'<h3>Cannot Login. Make sure that 2fa is off. Message: {message}</h3>', 500)
             has_connect_run = True
+        
+        if fetchall:
+            assets = {j: i for i, j in client.get_all_asset_name()}
+            return jsonify(dict(success=True, markets=assets))
+
         candles = await client.get_candle_v2(market, period)
         if isJson: return jsonify(dict(success=True, candles=candles))
         return render_template('chart.html', candles_str=json.dumps(candles), market=market)
