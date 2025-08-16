@@ -2,9 +2,9 @@ from flask import Flask, request, jsonify, render_template, redirect, make_respo
 from pyquotex.stable_api import Quotex
 import traceback, json, os, random, threading, time, requests as rq, logging, asyncio, websocket
 
-# for logger_name in logging.root.manager.loggerDict:
-#     if not logger_name.startswith("waitress"):
-#         logging.getLogger(logger_name).setLevel(logging.CRITICAL)
+for logger_name in logging.root.manager.loggerDict:
+    if not logger_name.startswith("waitress"):
+        logging.getLogger(logger_name).setLevel(logging.CRITICAL)
 
 # os.environ['RES_PATH'] = '/tmp'
 PROXIES = [
